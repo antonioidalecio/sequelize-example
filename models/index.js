@@ -1,39 +1,25 @@
-const fs = require('fs')
-const path = require('path')
-const Sequelize = require('sequelize')
-const env = process.env.NODE_ENV || 'development'
-const config = require('../config/config')[env]
+const { sequelize, Sequelize } = require('../database')
+const Role = require('./role')
+const User = require('./user')
+const Profile = require('./profile')
 
-const db = {}
+const models = {
+  Role,
+  User,
+  Profile
+}
 
-const basename = path.basename(__filename)
+for (let modelName in models) {
+  const model = models[modelName]
+  const newModel = model(sequelize, Sequelize)
+  models[modelName] = newModel
+}
 
-const sequelize = new Sequelize(
-	config.database,
-	config.username,
-	config.password,
-	config
-)
+for(let modelName in models) {
+	const model = models[modelName]
+	if (model.associate) {
+    model.associate(models)
+  }
+}
 
-fs.readdirSync(__dirname)
-	.filter((file) => {
-		const isHiddenFile = file.startsWith('.')
-		const isSameFile = file === basename
-		const isJsFile = file.endsWith('.js')
-		return !isHiddenFile && !isSameFile && isJsFile
-	})
-	.forEach((file) => {
-		const model = sequelize.import(path.join(__dirname, file))
-		db[model.name] = model
-	})
-
-Object.keys(db).forEach((modelName) => {
-	if (db[modelName].associate) {
-		db[modelName].associate(db)
-	}
-})
-
-db.sequelize = sequelize
-db.Sequelize = Sequelize
-
-module.exports = db
+module.exports = models
