@@ -2,11 +2,13 @@ const { sequelize, Sequelize } = require('../database')
 const Role = require('./role')
 const User = require('./user')
 const Profile = require('./profile')
+const UserRole = require('./userRole')
 
 const models = {
   Role,
   User,
-  Profile
+  Profile,
+  UserRole
 }
 
 for (let modelName in models) {
@@ -15,9 +17,9 @@ for (let modelName in models) {
   models[modelName] = newModel
 }
 
-for(let modelName in models) {
-	const model = models[modelName]
-	if (model.associate) {
+for (let modelName in models) {
+  const model = models[modelName]
+  if (model.associate) {
     model.associate(models)
   }
 }

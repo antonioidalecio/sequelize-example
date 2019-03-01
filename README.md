@@ -22,11 +22,10 @@ GRANT ALL PRIVILEGES ON DATABASE sequelize_example TO sequelize;
 npm install -g sequelize-cli
 ```
 
-## run migrations
+## run migrations and populate the database
 ```
-sequelize db:migrate
+npm run migrate
 ```
-
 
 ## start the project
 

@@ -1,19 +1,53 @@
+const bcrypt = require('bcrypt')
+
+const hashPassword = (password) => {
+	return bcrypt.hash(password, 10)
+}
+
 module.exports = (sequelize, DataTypes) => {
-	const User = sequelize.define('User', {
-		username: DataTypes.STRING,
-		password: DataTypes.STRING
+	const User = sequelize.define(
+		'User',
+		{
+			username: {
+				type: DataTypes.STRING,
+				unique: true
+			},
+			password: DataTypes.STRING
+		},
+		{
+			defaultScope: {
+				attributes: {
+					exclude: ['password'] // Exclude password from query results, unless you specify it explicitly on the query http://docs.sequelizejs.com/manual/tutorial/scopes.html
+				}
+			}
+		}
+	)
+
+	// Instance level method
+	User.prototype.toJSON = function() {
+    const valuesCopy = { ...this.dataValues }
+		delete valuesCopy.password
+		return valuesCopy
+	}
+
+	User.beforeSave((user, options) => {
+    if(!user.password) {
+      return Promise.resolve()
+    }
+		return hashPassword(user.password).then((hashedPassword) => {
+			user.password = hashedPassword
+		})
 	})
 
 	User.associate = function(models) {
-		// associations can be defined here
-		User.hasOne(models.Profile, {
+		User.Profile = User.hasOne(models.Profile, {
 			foreignKey: 'userId',
 			as: 'profile'
 		})
-		User.belongsToMany(models.Role, {
+		User.Roles = User.belongsToMany(models.Role, {
 			foreignKey: 'userId',
 			as: 'roles',
-			through: 'UserRole'
+			through: models.UserRole
 		})
 	}
 

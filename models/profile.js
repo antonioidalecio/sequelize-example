@@ -6,8 +6,13 @@ module.exports = (sequelize, DataTypes) => {
 		gender: DataTypes.STRING,
 		position: DataTypes.STRING
 	})
+
 	Profile.associate = function(models) {
-		// associations can be defined here
+		Profile.User = Profile.belongsTo(models.User, {
+			foreignKey: 'userId',
+			as: 'user'
+		})
 	}
+
 	return Profile
 }
